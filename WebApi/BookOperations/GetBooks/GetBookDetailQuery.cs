@@ -6,20 +6,23 @@ using WebApi.DbOperations;
 
 namespace WebApi.BookOperations.GetBooks
 {
-    public class GetBookByIdQuery
+    public class GetBookDetailQuery
     {
         public int Id { get; set; }
         private readonly BookStoreDbContext _dbContext;
 
-        public GetBookByIdQuery(BookStoreDbContext dbContext)
+        public GetBookDetailQuery(BookStoreDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public BooksViewModel Handle()
+        public BookDetailViewModel Handle()
         {
             var book = _dbContext.Books.Where(x => x.Id == Id).SingleOrDefault();
-            BooksViewModel vm = new BooksViewModel()
+            if(book is null)
+                throw new InvalidOperationException("The book wasn't found!");
+            
+            BookDetailViewModel vm = new BookDetailViewModel()
             {
                 Title = book.Title,
                 Genre = ((GenreEnum)book.GenreId).ToString(),
@@ -31,11 +34,11 @@ namespace WebApi.BookOperations.GetBooks
         }
     }
 
-    // public class BookByIdViewModel
-    // {
-    //     public string Title { get; set; }
-    //     public int PageCount { get; set; }
-    //     public string PublishDate { get; set; }
-    //     public string Genre { get; set; }
-    // }
+    public class BookDetailViewModel
+    {
+        public string Title { get; set; }
+        public int PageCount { get; set; }
+        public string PublishDate { get; set; }
+        public string Genre { get; set; }
+    }
 }
