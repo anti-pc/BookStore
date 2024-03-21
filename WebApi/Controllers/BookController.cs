@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.BookOperations.CreateBook;
 using WebApi.BookOperations.GetBooks;
 using WebApi.DbOperations;
 
@@ -14,21 +15,18 @@ namespace WebApi.Controllers
 
         private readonly BookStoreDbContext _context;
 
-         public BookController(BookStoreDbContext context)
-         {
+        public BookController(BookStoreDbContext context)
+        {
             _context = context;
-         }
+        }
 
 
         [HttpGet]
         public IActionResult GetBooks()
         {
-            // var bookList = _context.Books.OrderBy(x => x.Id).ToList<Book>();
-            // return bookList;
-
             GetBooksQuery query = new GetBooksQuery(_context);
             var result = query.Handle();
-            
+
             return Ok(result);
         }
 
@@ -41,25 +39,28 @@ namespace WebApi.Controllers
 
         //Post
         [HttpPost]
-        public IActionResult AddBook([FromBody] Book newBook)
+        public IActionResult AddBook([FromBody] CreateBookModel newBook)
         {
-            var book = _context.Books.SingleOrDefault(x=>x.Title==newBook.Title);
-
-            if(book is not null)
-                return BadRequest();
-
-            _context.Books.Add(newBook);
-            _context.SaveChanges();
+            CreateBookCommand command = new CreateBookCommand(_context);
+            try
+            {
+                command.Model = newBook;
+                command.Handle();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
             return Ok();
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateBook(int id,[FromBody] Book updatedBook)
+        public IActionResult UpdateBook(int id, [FromBody] Book updatedBook)
         {
             var book = _context.Books.Where(x => x.Id == id).SingleOrDefault();
 
-            if(book is null)
+            if (book is null)
                 return BadRequest();
 
             book.GenreId = updatedBook.GenreId != default ? updatedBook.GenreId : book.GenreId;
@@ -76,14 +77,14 @@ namespace WebApi.Controllers
         public IActionResult DeleteBook(int id)
         {
             var book = _context.Books.Where(x => x.Id == id).SingleOrDefault();
-            
-            if(book is null)
+
+            if (book is null)
                 return BadRequest();
 
             _context.Books.Remove(book);
             _context.SaveChanges();
 
-            return Ok();           
+            return Ok();
         }
 
     }
