@@ -42,7 +42,7 @@ namespace WebApi.Controllers
             if(book is not null)
                 return BadRequest();
 
-            _context.Books.Add(book);
+            _context.Books.Add(newBook);
             _context.SaveChanges();
 
             return Ok();
