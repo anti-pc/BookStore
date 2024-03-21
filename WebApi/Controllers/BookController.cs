@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.BookOperations.GetBooks;
 using WebApi.DbOperations;
 
 namespace WebApi.Controllers
@@ -20,10 +21,15 @@ namespace WebApi.Controllers
 
 
         [HttpGet]
-        public List<Book> GetBooks()
+        public IActionResult GetBooks()
         {
-            var bookList = _context.Books.OrderBy(x => x.Id).ToList<Book>();
-            return bookList;
+            // var bookList = _context.Books.OrderBy(x => x.Id).ToList<Book>();
+            // return bookList;
+
+            GetBooksQuery query = new GetBooksQuery(_context);
+            var result = query.Handle();
+            
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
